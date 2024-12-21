@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/veliashev/rpn/internal/errors"
+	"github.com/veliashev/rpn/pkg/errors"
 )
 
 // Calc принимает строку с математическим выражением и возвращает результат вычисления

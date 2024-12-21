@@ -1,4 +1,4 @@
-# Сервис для вычисления арифметических выражений
+# Веб-сервис для вычисления арифметических выражений
 
 ## Описание
 
@@ -20,7 +20,12 @@
    go run ./cmd/main.go
    ```
 
-По умолчанию сервис будет доступен по адресу http://localhost:8080.
+3. Можно воспользоваться командой **make**:
+   ```sh
+   make run
+   ```
+
+По умолчанию сервер будет доступен по адресу http://localhost:8080.
 
 ## API Endpoint
 
@@ -69,7 +74,7 @@
 ### Успешное вычисление
 
 ```sh
-curl --location 'http://localhost:8080/api/v1/calculate' --header 'Content-Type: application/json' --data '{"expression": "2+2\*2"}'
+curl --location 'http://localhost:8080/api/v1/calculate' --header 'Content-Type: application/json' --data '{"expression": "2+2*2"}'
 ```
 
 - Ответ:
@@ -103,3 +108,17 @@ curl --location 'http://localhost:8080/api/v1/calculate' --header 'Content-Type:
     "error": "json: cannot unmarshal number into Go struct field Request.expression of type string"
   }
   ```
+
+## Тестирование
+
+Запустить тесты также можно с помощью **make**:
+
+```sh
+make test
+```
+
+Или вручную, параллельно с запущенным сервером запустив скрипт [test.sh](./test/test.sh). В таком случае не забудьте выдать ему полномочия для запуска:
+
+```sh
+sudo chmod +x ./test/test.sh
+```
