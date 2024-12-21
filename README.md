@@ -90,8 +90,8 @@ curl --location 'http://localhost/api/v1/calculate' \
 
 1. Клонируйте репозиторий:
 
-   git clone https://github.com/yourusername/calculator-web-service.git
-   cd calculator-web-service
+   git clone https://github.com/veliashev/web-calculation
+   cd web-calculation
 
 2. Запустите проект:
 
