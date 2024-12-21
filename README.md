@@ -42,11 +42,11 @@
 
     - Код статуса: 500
 
-## Примеры использования
+## Примеры использования на порту :8080
 
 ### Успешное вычисление
 
-curl --location 'http://localhost/api/v1/calculate' \
+curl --location 'http://localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
 --data '{
 "expression": "2+2\*2"
@@ -55,7 +55,7 @@ curl --location 'http://localhost/api/v1/calculate' \
 - Ответ:
 
   {
-  "result": "6"
+  "result": 6
   }
 
 ### Некорректное выражение
@@ -69,7 +69,7 @@ curl --location 'http://localhost/api/v1/calculate' \
 - Ответ:
 
   {
-  "error": "Expression is not valid"
+  "error": "недопустимая цифра"
   }
 
 ### Внутренняя ошибка сервера

@@ -23,24 +23,20 @@ func tokenize(expression string) []string {
 	// Перебираем каждый символ в выражении
 	for _, char := range expression {
 		if unicode.IsDigit(char) || char == '.' {
-			// Если символ - цифра или точка, добавляем к текущему числу
 			current += string(char)
 		} else if char == ',' {
-			// Если символ - запятая, заменяем ее на точку для корректного вычисления
 			current += string(".")
 		} else {
-			// Если встретили не цифру, сохраняем накопленное число
 			if current != "" {
 				tokens = append(tokens, current)
 				current = ""
 			}
-			// Если символ не пробел, добавляем его как оператор
 			if !unicode.IsSpace(char) {
 				tokens = append(tokens, string(char))
 			}
 		}
 	}
-	// Добавляем последнее число, если оно есть
+
 	if current != "" {
 		tokens = append(tokens, current)
 	}

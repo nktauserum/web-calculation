@@ -3,13 +3,19 @@ package main
 import (
 	"log"
 
+	"github.com/veliashev/rpn/config"
 	"github.com/veliashev/rpn/internal/application"
 )
 
 func main() {
-	app := application.New(8080)
-	err := app.Run()
+	config, err := config.GetConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error getting config: %s", err)
+	}
+
+	app := application.New(config.Port)
+	err = app.Run()
+	if err != nil {
+		log.Fatalf("Error starting application: %s", err)
 	}
 }
