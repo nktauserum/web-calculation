@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/veliashev/rpn/config"
-	"github.com/veliashev/rpn/internal/application"
+	"github.com/veliashev/web-calculation/config"
+	"github.com/veliashev/web-calculation/internal/application"
 )
 
 func main() {

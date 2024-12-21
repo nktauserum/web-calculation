@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/veliashev/rpn/pkg/calculation"
+	"github.com/veliashev/web-calculation/pkg/calculation"
 )
 
 type Application struct {
