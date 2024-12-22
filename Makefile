@@ -4,4 +4,4 @@ run: build
 	@./bin/main
 
 test: build
-	@./bin/main > /dev/null & ./test/test.sh
+	@go test ./test/*
