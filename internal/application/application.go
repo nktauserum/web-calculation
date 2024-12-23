@@ -28,6 +28,7 @@ type Response struct {
 
 // Функция обрабатывает все ошибки, возвращая их в json-формате и с соответствующим кодом
 func HandleError(w http.ResponseWriter, r *http.Request, err error, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
 	result := Error{Error: err.Error()}
 	bytes, err := json.Marshal(&result)
 	if err != nil {
@@ -36,7 +37,6 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error, statusCode i
 		log.Printf("Unexpected error: %s", err)
 		return
 	}
-
 	w.WriteHeader(statusCode)
 	fmt.Fprint(w, string(bytes))
 	log.Printf("Error: %s", result.Error)
@@ -44,6 +44,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error, statusCode i
 }
 
 func CalculationHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	log.Println("Got a new request!")
 
 	request := new(Request)
