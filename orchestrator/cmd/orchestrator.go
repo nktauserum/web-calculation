@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/veliashev/web-calculation/config"
-	"github.com/veliashev/web-calculation/internal/application"
+	"github.com/veliashev/web-calculation/orchestrator/internal/controller"
+	"github.com/veliashev/web-calculation/shared/config"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 		log.Fatalf("Error getting config: %s", err)
 	}
 
-	app := application.New(config.Port)
+	app := controller.New(config.Port)
 	err = app.Run()
 	if err != nil {
 		log.Fatalf("Error starting application: %s", err)

@@ -11,7 +11,7 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
-	path := "config/config.json"
+	path := "shared/config/config.json"
 
 	configFile, err := os.Open(path)
 	if err != nil {
