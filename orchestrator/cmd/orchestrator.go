@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/veliashev/web-calculation/orchestrator/internal/controller"
-	"github.com/veliashev/web-calculation/shared/config"
+	"github.com/nktauserum/web-calculation/orchestrator/internal/controller"
+	"github.com/nktauserum/web-calculation/shared/config"
 )
 
 func main() {

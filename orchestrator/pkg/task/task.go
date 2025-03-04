@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/veliashev/web-calculation/shared"
-	"github.com/veliashev/web-calculation/shared/errors"
+	"github.com/nktauserum/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/shared/errors"
 )
 
 // Операция в выражении

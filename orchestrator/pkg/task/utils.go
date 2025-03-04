@@ -3,7 +3,7 @@ package task
 import (
 	"unicode"
 
-	"github.com/veliashev/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/shared"
 )
 
 func IsNumeric(s string) bool {

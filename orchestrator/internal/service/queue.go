@@ -3,8 +3,8 @@ package service
 import (
 	"sync"
 
-	"github.com/veliashev/web-calculation/orchestrator/pkg/task"
-	"github.com/veliashev/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/orchestrator/pkg/task"
+	"github.com/nktauserum/web-calculation/shared"
 )
 
 var queue task.Queue

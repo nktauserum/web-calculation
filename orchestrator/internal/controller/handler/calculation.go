@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/veliashev/web-calculation/orchestrator/internal/service"
-	"github.com/veliashev/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/orchestrator/internal/service"
+	"github.com/nktauserum/web-calculation/shared"
 )
 
 func CalculationHandler(w http.ResponseWriter, r *http.Request) {

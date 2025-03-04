@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/veliashev/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/shared"
 )
 
 type Agent struct {

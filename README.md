@@ -17,7 +17,7 @@
 1. Клонируйте репозиторий:
 
    ```sh
-   git clone https://github.com/veliashev/web-calculation
+   git clone https://github.com/nktauserum/web-calculation
 
    cd web-calculation
    ```

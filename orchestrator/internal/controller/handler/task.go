@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/veliashev/web-calculation/orchestrator/internal/service"
-	tsk "github.com/veliashev/web-calculation/orchestrator/pkg/task"
-	"github.com/veliashev/web-calculation/shared"
+	"github.com/nktauserum/web-calculation/orchestrator/internal/service"
+	tsk "github.com/nktauserum/web-calculation/orchestrator/pkg/task"
+	"github.com/nktauserum/web-calculation/shared"
 )
 
 func GetAvailableTask(w http.ResponseWriter, r *http.Request) {

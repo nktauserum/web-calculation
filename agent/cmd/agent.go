@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/veliashev/web-calculation/agent/internal/controller"
+	"github.com/nktauserum/web-calculation/agent/internal/controller"
 )
 
 func main() {

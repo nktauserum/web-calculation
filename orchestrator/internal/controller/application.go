@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/veliashev/web-calculation/orchestrator/internal/controller/handler"
+	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/handler"
 )
 
 type Orchestrator struct {
