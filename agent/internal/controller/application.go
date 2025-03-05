@@ -43,7 +43,7 @@ func (app *Agent) Run() error {
 			defer wg.Done()
 			for {
 				// Get task from orchestrator
-				resp, err := http.Get("http://orchestrator:8080/internal/task")
+				resp, err := http.Get("http://localhost:8080/internal/task")
 				if err != nil {
 					log.Printf("Error getting task: %v", err)
 					time.Sleep(time.Second)

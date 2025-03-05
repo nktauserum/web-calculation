@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 
 	"github.com/nktauserum/web-calculation/orchestrator/internal/service"
 	tsk "github.com/nktauserum/web-calculation/orchestrator/pkg/task"
@@ -77,7 +80,12 @@ func ExpressionsListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := json.Marshal(expressions)
+	var result []shared.Expression
+	for _, expression := range expressions {
+		result = append(result, expression)
+	}
+
+	resp, err := json.Marshal(result)
 	if err != nil {
 		HandleError(w, r, err, http.StatusInternalServerError)
 		return
@@ -96,11 +104,45 @@ func TaskListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := json.Marshal(tasks)
+	var result []shared.Task
+	for _, task := range tasks {
+		result = append(result, task)
+	}
+
+	resp, err := json.Marshal(result)
 	if err != nil {
 		HandleError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
+	w.Write(resp)
+}
+
+func ExpressionByIDHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	queue := service.GetQueue()
+
+	vars := mux.Vars(r)
+	expressionID, err := strconv.ParseInt(vars["expressionID"], 10, 64)
+	if err != nil {
+		HandleError(w, r, err, 500)
+		return
+	}
+
+	expressions := queue.GetExpressions()
+	if len(expressions) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	currentTask := expressions[expressionID]
+
+	resp, err := json.Marshal(&currentTask)
+	if err != nil {
+		HandleError(w, r, err, 500)
+		return
+	}
+
+	w.WriteHeader(200)
 	w.Write(resp)
 }

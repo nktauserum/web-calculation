@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/handler"
 )
 
@@ -19,10 +21,13 @@ func New(port int) *Orchestrator {
 func (app *Orchestrator) Run() error {
 	log.Println("Orchestrator started!")
 
-	http.HandleFunc("/api/v1/calculate", handler.CalculationHandler)
-	http.HandleFunc("/api/v1/expressions", handler.ExpressionsListHandler)
-	http.HandleFunc("/api/v1/tasks", handler.TaskListHandler)
-	http.HandleFunc("/internal/task", handler.GetAvailableTask)
+	mux := mux.NewRouter()
 
-	return http.ListenAndServe(":"+fmt.Sprint(app.Port), nil)
+	mux.HandleFunc("/api/v1/calculate", handler.CalculationHandler)
+	mux.HandleFunc("/api/v1/expressions", handler.ExpressionsListHandler)
+	mux.HandleFunc("/api/v1/expressions/{expressionID}", handler.ExpressionByIDHandler)
+	mux.HandleFunc("/api/v1/tasks", handler.TaskListHandler)
+	mux.HandleFunc("/internal/task", handler.GetAvailableTask)
+
+	return http.ListenAndServe(":"+fmt.Sprint(app.Port), mux)
 }
