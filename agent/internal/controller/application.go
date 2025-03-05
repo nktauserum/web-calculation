@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/nktauserum/web-calculation/shared"
 )
 
@@ -118,8 +120,11 @@ TIME_SUBTRACTION_MS - время выполнения операции вычи�
 TIME_MULTIPLICATIONS_MS - время выполнения операции умножения в миллисекундах
 TIME_DIVISIONS_MS - время выполнения операции деления в миллисекундах
 */
-
 func calculateExpression(task shared.Task) (float64, error) {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("Error loading .env file: %v", err)
+	}
+
 	firstarg, err := strconv.ParseFloat(task.FirstArgument, 64)
 	if err != nil {
 		log.Printf("Error parsing first argument: %v", err)
@@ -138,7 +143,7 @@ func calculateExpression(task shared.Task) (float64, error) {
 		if os.Getenv("TIME_ADDITION_MS") == "" {
 			addition_time = time.Second * 0
 		} else {
-			addition_time, err = time.ParseDuration(os.Getenv("TIME_ADDITION_MS"))
+			addition_time, err = time.ParseDuration(os.Getenv("TIME_ADDITION_MS") + "ms")
 			if err != nil {
 				log.Printf("Error parsing addition_time: %v", err)
 				return 0, err
@@ -152,7 +157,7 @@ func calculateExpression(task shared.Task) (float64, error) {
 		if os.Getenv("TIME_SUBTRACTION_MS") == "" {
 			subtraction_time = time.Second * 0
 		} else {
-			subtraction_time, err = time.ParseDuration(os.Getenv("TIME_SUBTRACTION_MS"))
+			subtraction_time, err = time.ParseDuration(os.Getenv("TIME_SUBTRACTION_MS") + "ms")
 			if err != nil {
 				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
 				return 0, err
@@ -163,12 +168,12 @@ func calculateExpression(task shared.Task) (float64, error) {
 	case '*':
 		// задержка для умножения
 		var multiplication_time time.Duration
-		if os.Getenv("TIME_SUBTRACTION_MS") == "" {
+		if os.Getenv("TIME_MULTIPLICATIONS_MS") == "" {
 			multiplication_time = time.Second * 0
 		} else {
-			multiplication_time, err = time.ParseDuration(os.Getenv("TIME_MULTIPLICATIONS_MS"))
+			multiplication_time, err = time.ParseDuration(os.Getenv("TIME_MULTIPLICATIONS_MS") + "ms")
 			if err != nil {
-				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
+				log.Printf("Error parsing TIME_MULTIPLICATIONS_MS: %v", err)
 				return 0, err
 			}
 		}
@@ -180,9 +185,9 @@ func calculateExpression(task shared.Task) (float64, error) {
 		if os.Getenv("TIME_DIVISIONS_MS") == "" {
 			division_time = time.Second * 0
 		} else {
-			division_time, err = time.ParseDuration(os.Getenv("TIME_DIVISIONS_MS"))
+			division_time, err = time.ParseDuration(os.Getenv("TIME_DIVISIONS_MS") + "ms")
 			if err != nil {
-				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
+				log.Printf("Error parsing TIME_DIVISIONS_MS: %v", err)
 				return 0, err
 			}
 		}
