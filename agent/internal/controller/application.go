@@ -134,37 +134,57 @@ func calculateExpression(task shared.Task) (float64, error) {
 	switch task.Operator {
 	case '+':
 		// задержка для сложения
-		var addition_time, err = time.ParseDuration(os.Getenv("TIME_ADDITION_MS"))
-		if err != nil {
-			log.Printf("Error parsing addition_time: %v", err)
-			return 0, err
+		var addition_time time.Duration
+		if os.Getenv("TIME_ADDITION_MS") == "" {
+			addition_time = time.Second * 0
+		} else {
+			addition_time, err = time.ParseDuration(os.Getenv("TIME_ADDITION_MS"))
+			if err != nil {
+				log.Printf("Error parsing addition_time: %v", err)
+				return 0, err
+			}
 		}
+
 		time.Sleep(addition_time)
 		return firstarg + secondarg, nil
 	case '-':
-		// задержка для вычитания
-		var subtraction_time, err = time.ParseDuration(os.Getenv("TIME_SUBTRACTION_MS"))
-		if err != nil {
-			log.Printf("Error parsing subtraction_time: %v", err)
-			return 0, err
+		var subtraction_time time.Duration
+		if os.Getenv("TIME_SUBTRACTION_MS") == "" {
+			subtraction_time = time.Second * 0
+		} else {
+			subtraction_time, err = time.ParseDuration(os.Getenv("TIME_SUBTRACTION_MS"))
+			if err != nil {
+				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
+				return 0, err
+			}
 		}
 		time.Sleep(subtraction_time)
 		return firstarg - secondarg, nil
 	case '*':
 		// задержка для умножения
-		var multiplication_time, err = time.ParseDuration(os.Getenv("TIME_MULTIPLICATIONS_MS"))
-		if err != nil {
-			log.Printf("Error parsing multiplication_time: %v", err)
-			return 0, err
+		var multiplication_time time.Duration
+		if os.Getenv("TIME_SUBTRACTION_MS") == "" {
+			multiplication_time = time.Second * 0
+		} else {
+			multiplication_time, err = time.ParseDuration(os.Getenv("TIME_MULTIPLICATIONS_MS"))
+			if err != nil {
+				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
+				return 0, err
+			}
 		}
 		time.Sleep(multiplication_time)
 		return firstarg * secondarg, nil
 	case '/':
 		// задержка для деления
-		var division_time, err = time.ParseDuration(os.Getenv("TIME_DIVISIONS_MS"))
-		if err != nil {
-			log.Printf("Error parsing division_time: %v", err)
-			return 0, err
+		var division_time time.Duration
+		if os.Getenv("TIME_DIVISIONS_MS") == "" {
+			division_time = time.Second * 0
+		} else {
+			division_time, err = time.ParseDuration(os.Getenv("TIME_DIVISIONS_MS"))
+			if err != nil {
+				log.Printf("Error parsing TIME_SUBTRACTION_MS: %v", err)
+				return 0, err
+			}
 		}
 		time.Sleep(division_time)
 
