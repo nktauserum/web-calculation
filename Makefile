@@ -1,7 +1,5 @@
-build:
-	@go build -o ./bin/main cmd/main.go
-run: build
-	@./bin/main
+ag:
+	@go run ./agent/cmd/agent.go
 
-test: build
-	@go test ./test/*
+orch:
+	@go run ./orchestrator/cmd/orchestrator.go
