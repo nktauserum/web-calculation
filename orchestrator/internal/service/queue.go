@@ -4,15 +4,25 @@ import (
 	"sync"
 
 	"github.com/nktauserum/web-calculation/orchestrator/pkg/task"
-	"github.com/nktauserum/web-calculation/shared"
 )
 
 var queue task.Queue
 var once sync.Once
 
 func GetQueue() *task.Queue {
+	var err error
 	once.Do(func() {
-		queue = task.Queue{Tasks: make(map[int64]shared.Task), Expressions: map[int64]shared.Expression{}}
+		q, err_in := task.NewQueue("sqlite.db")
+		if err_in != nil {
+			err = err_in
+		}
+
+		queue = *q
 	})
+
+	if err != nil {
+		return nil
+	}
+
 	return &queue
 }

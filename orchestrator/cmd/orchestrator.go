@@ -13,6 +13,8 @@ func main() {
 		log.Fatalf("Error getting config: %s", err)
 	}
 
+	log.Println("orchestrator started")
+
 	app := controller.New(config.Port)
 	err = app.Run()
 	if err != nil {
