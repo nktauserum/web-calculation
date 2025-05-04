@@ -4,19 +4,11 @@ import (
 	"log"
 
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller"
-	"github.com/nktauserum/web-calculation/shared/config"
 )
 
 func main() {
-	config, err := config.GetConfig()
-	if err != nil {
-		log.Fatalf("Error getting config: %s", err)
-	}
-
-	log.Println("orchestrator started")
-
-	app := controller.New(config.Port, "sqlite.db", "some-secret")
-	err = app.Run()
+	app := controller.New()
+	err := app.Run()
 	if err != nil {
 		log.Fatalf("Error starting application: %s", err)
 	}

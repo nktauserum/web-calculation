@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/handler"
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/middleware"
@@ -20,11 +23,19 @@ type Orchestrator struct {
 	TokenExpiry time.Duration
 }
 
-func New(port int, dbPath string, jwtSecret string) *Orchestrator {
+func New() *Orchestrator {
+	_ = godotenv.Load(".env")
+	port := 8080 // Default port
+	if portStr := os.Getenv("PORT"); portStr != "" {
+		if p, err := strconv.Atoi(portStr); err == nil {
+			port = p
+		}
+	}
+
 	return &Orchestrator{
 		Port:        port,
-		DBPath:      dbPath,
-		JWTSecret:   jwtSecret,
+		DBPath:      os.Getenv("DB_PATH"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
 		TokenExpiry: 24 * time.Hour, // Токен действителен 24 часа
 	}
 }
