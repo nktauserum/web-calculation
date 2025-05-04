@@ -15,7 +15,7 @@ func main() {
 
 	log.Println("orchestrator started")
 
-	app := controller.New(config.Port)
+	app := controller.New(config.Port, "sqlite.db", "some-secret")
 	err = app.Run()
 	if err != nil {
 		log.Fatalf("Error starting application: %s", err)
