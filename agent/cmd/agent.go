@@ -7,7 +7,11 @@ import (
 )
 
 func main() {
-	agent := controller.NewAgent(8081)
+	agent, err := controller.NewAgent("localhost:5000")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if err := agent.Run(); err != nil {
 		log.Fatalf("error running agent: %s", err)
 	}

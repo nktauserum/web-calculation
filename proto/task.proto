@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package tasks;
+option go_package = "./pb;pb";
+
+message Task {
+  int64 id = 1;
+  string arg1 = 2;
+  string arg2 = 3;
+  string operator = 4;
+  double operation_time = 5;
+  bool status = 6;
+  double result = 7;
+}
+
+message TaskResult {
+  int64 id = 1;
+  double result = 2;
+}
+
+message Empty {}
+
+service TaskService {
+  rpc GetAvailableTask(Empty) returns (Task) {}
+  rpc CompleteTask(TaskResult) returns (Empty) {}
+}

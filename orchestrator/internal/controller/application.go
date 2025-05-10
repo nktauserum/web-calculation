@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,10 +11,13 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/handler"
 	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/middleware"
 	"github.com/nktauserum/web-calculation/orchestrator/pkg/auth"
+	"github.com/nktauserum/web-calculation/proto"
+	"github.com/nktauserum/web-calculation/proto/pb"
 )
 
 type Orchestrator struct {
@@ -21,6 +25,32 @@ type Orchestrator struct {
 	DBPath      string
 	JWTSecret   string
 	TokenExpiry time.Duration
+	grpc        *RPCServer
+}
+
+type RPCServer struct {
+	server *proto.Server
+	port   int
+}
+
+func NewRPCServer(port int) *RPCServer {
+	return &RPCServer{
+		port: port,
+	}
+}
+
+func (s *RPCServer) Start() error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+	if err != nil {
+		return err
+	}
+
+	s.server = &proto.Server{}
+	grpcServer := grpc.NewServer()
+	pb.RegisterTaskServiceServer(grpcServer, s.server)
+
+	log.Printf("Starting gRPC server on port %d", s.port)
+	return grpcServer.Serve(lis)
 }
 
 func New() *Orchestrator {
@@ -37,6 +67,7 @@ func New() *Orchestrator {
 		DBPath:      os.Getenv("DB_PATH"),
 		JWTSecret:   os.Getenv("JWT_SECRET"),
 		TokenExpiry: 24 * time.Hour, // Токен действителен 24 часа
+		grpc:        NewRPCServer(5000),
 	}
 }
 
@@ -54,6 +85,12 @@ func (app *Orchestrator) Run() error {
 
 	authMiddleware := middleware.NewAuthMiddleware(authService)
 
+	go func() {
+		if err := app.grpc.Start(); err != nil {
+			log.Fatalf("Failed to start gRPC server: %v", err)
+		}
+	}()
+
 	router := mux.NewRouter()
 
 	// Публичные маршруты (без авторизации)
@@ -65,9 +102,6 @@ func (app *Orchestrator) Run() error {
 	router.HandleFunc("/api/v1/expressions", authMiddleware.RequireAuth(handler.ExpressionsListHandler))
 	router.HandleFunc("/api/v1/expressions/{expressionID}", authMiddleware.RequireAuth(handler.ExpressionByIDHandler))
 	router.HandleFunc("/api/v1/tasks", authMiddleware.RequireAuth(handler.TaskListHandler))
-
-	// Внутренние маршруты (не требуют авторизации)
-	router.HandleFunc("/internal/task", handler.GetAvailableTask)
 
 	return http.ListenAndServe(":"+fmt.Sprint(app.Port), router)
 }

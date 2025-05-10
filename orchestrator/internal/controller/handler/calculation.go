@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/nktauserum/web-calculation/orchestrator/internal/service"
+	"github.com/nktauserum/web-calculation/orchestrator/pkg/service"
 	"github.com/nktauserum/web-calculation/shared"
 )
 

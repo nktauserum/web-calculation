@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/nktauserum/web-calculation/orchestrator/internal/service"
+	"github.com/nktauserum/web-calculation/orchestrator/pkg/service"
 	tsk "github.com/nktauserum/web-calculation/orchestrator/pkg/task"
 	"github.com/nktauserum/web-calculation/shared"
 )

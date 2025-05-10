@@ -1,29 +1,82 @@
 package controller
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/nktauserum/web-calculation/proto/pb"
 	"github.com/nktauserum/web-calculation/shared"
 )
 
 type Agent struct {
-	Port int
+	client pb.TaskServiceClient
+	conn   *grpc.ClientConn
 }
 
-func NewAgent(port int) *Agent {
+func NewAgent(address string) (*Agent, error) {
+	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	client := pb.NewTaskServiceClient(conn)
 	return &Agent{
-		Port: port,
+		client: client,
+		conn:   conn,
+	}, nil
+}
+
+func (c *Agent) GetTask() (*shared.Task, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	task, err := c.client.GetAvailableTask(ctx, &pb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+
+	if task == nil {
+		return nil, nil
+	}
+
+	if !task.Status {
+		return nil, fmt.Errorf("no tasks available")
+	}
+
+	return &shared.Task{
+		ID:             task.Id,
+		FirstArgument:  task.Arg1,
+		SecondArgument: task.Arg2,
+		Operator:       rune(task.Operator[0]),
+		OperationTime:  task.OperationTime,
+		Status:         task.Status,
+		Result:         task.Result,
+	}, nil
+}
+
+func (c *Agent) CompleteTask(id int64, result float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	_, err := c.client.CompleteTask(ctx, &pb.TaskResult{
+		Id:     id,
+		Result: result,
+	})
+	return err
+}
+
+func (c *Agent) Close() {
+	if c.conn != nil {
+		c.conn.Close()
 	}
 }
 
@@ -39,34 +92,14 @@ func (app *Agent) Run() error {
 
 	processedTasks := sync.Map{}
 
-	for i := 0; i < workers; i++ {
+	for range workers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for {
 				// Get task from orchestrator
-				resp, err := http.Get("http://localhost:8080/internal/task")
+				task, err := app.GetTask()
 				if err != nil {
-					log.Printf("Error getting task: %v", err)
-					time.Sleep(time.Second)
-					continue
-				}
-
-				if resp.StatusCode == http.StatusNoContent {
-					time.Sleep(time.Second)
-					continue
-				}
-
-				body, err := io.ReadAll(resp.Body)
-				if err != nil {
-					log.Printf("Error reading response: %v", err)
-					continue
-				}
-
-				var task shared.Task
-				err = json.Unmarshal(body, &task)
-				if err != nil {
-					log.Printf("Error unmarshalling body: %v", err)
 					continue
 				}
 
@@ -81,27 +114,16 @@ func (app *Agent) Run() error {
 				log.Printf("Получена задача %d", task.ID)
 
 				// Calculate expression
-				result, err := calculateExpression(task)
+				result, err := calculateExpression(*task)
 				if err != nil {
 					log.Printf("Error calculating expression: %v", err)
 					continue
 				}
 
-				var answer = shared.TaskResult{
-					ID:     task.ID,
-					Result: result,
-				}
-
-				data, err := json.Marshal(&answer)
+				err = app.CompleteTask(task.ID, result)
 				if err != nil {
-					log.Printf("Error marshalling result: %v", err)
+					log.Printf("Error completing task: %v", err)
 					continue
-				}
-
-				// Send result back
-				_, err = http.Post("http://localhost:8080/internal/task", "application/json", bytes.NewBuffer(data))
-				if err != nil {
-					log.Printf("Error sending result: %v", err)
 				}
 
 				processedTasks.Delete(task.ID)
