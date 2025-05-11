@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/middleware"
 	"github.com/nktauserum/web-calculation/shared"
 	"github.com/nktauserum/web-calculation/shared/errors"
 )
@@ -73,8 +75,10 @@ func (q *Queue) initTables() error {
 	_, err = q.db.Exec(`
 		CREATE TABLE IF NOT EXISTS expressions (
 			id INTEGER PRIMARY KEY,
+			user_id INTEGER NOT NULL,
 			status BOOLEAN NOT NULL DEFAULT 0,
-			result TEXT NOT NULL
+			result TEXT NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES users(id)
 		)
 	`)
 	return err
@@ -107,8 +111,7 @@ func (q *Queue) AddTask(task shared.Task) int64 {
 	return newID
 }
 
-func (q *Queue) AddExpression(expression shared.Expression) int64 {
-	// Находим максимальный ID существующих выражений
+func (q *Queue) AddExpression(expression shared.Expression, userID int64) int64 {
 	var maxID int64
 	err := q.db.QueryRow("SELECT COALESCE(MAX(id), 0) FROM expressions").Scan(&maxID)
 	if err != nil {
@@ -122,8 +125,8 @@ func (q *Queue) AddExpression(expression shared.Expression) int64 {
 
 	// Добавляем выражение в базу данных
 	_, err = q.db.Exec(
-		"INSERT INTO expressions (id, status, result) VALUES (?, ?, ?)",
-		expression.ID, expression.Status, expression.Result,
+		"INSERT INTO expressions (id, user_id, status, result) VALUES (?, ?, ?, ?)",
+		expression.ID, userID, expression.Status, expression.Result,
 	)
 	if err != nil {
 		log.Printf("Ошибка при добавлении выражения: %v", err)
@@ -212,7 +215,7 @@ func (q *Queue) GetExpressions() map[int64]shared.Expression {
 
 	expressions := make(map[int64]shared.Expression)
 
-	rows, err := q.db.Query("SELECT id, status, result FROM expressions")
+	rows, err := q.db.Query("SELECT id, user_id, status, result FROM expressions")
 	if err != nil {
 		log.Printf("Ошибка при получении выражений: %v", err)
 		return expressions
@@ -221,7 +224,7 @@ func (q *Queue) GetExpressions() map[int64]shared.Expression {
 
 	for rows.Next() {
 		var expr shared.Expression
-		err := rows.Scan(&expr.ID, &expr.Status, &expr.Result)
+		err := rows.Scan(&expr.ID, &expr.UserID, &expr.Status, &expr.Result)
 		if err != nil {
 			log.Printf("Ошибка при сканировании выражения: %v", err)
 			continue
@@ -234,7 +237,7 @@ func (q *Queue) GetExpressions() map[int64]shared.Expression {
 }
 
 func (q *Queue) UpdateExpressions() error {
-	rows, err := q.db.Query("SELECT id, status, result FROM expressions")
+	rows, err := q.db.Query("SELECT id, user_id, status, result FROM expressions")
 	if err != nil {
 		return err
 	}
@@ -242,7 +245,7 @@ func (q *Queue) UpdateExpressions() error {
 
 	for rows.Next() {
 		var expr shared.Expression
-		err := rows.Scan(&expr.ID, &expr.Status, &expr.Result)
+		err := rows.Scan(&expr.ID, &expr.UserID, &expr.Status, &expr.Result)
 		if err != nil {
 			log.Printf("Ошибка при сканировании выражения: %v", err)
 			continue
@@ -299,9 +302,9 @@ func (q *Queue) UpdateExpressions() error {
 func (q *Queue) FindExpression(id int64) *shared.Expression {
 	var expr shared.Expression
 	err := q.db.QueryRow(
-		"SELECT id, status, result FROM expressions WHERE id = ?",
+		"SELECT id, user_id, status, result FROM expressions WHERE id = ?",
 		id,
-	).Scan(&expr.ID, &expr.Status, &expr.Result)
+	).Scan(&expr.ID, &expr.UserID, &expr.Status, &expr.Result)
 
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -471,7 +474,7 @@ func (q *Queue) generateTasksFromRPN(output []string) ([]shared.Task, map[int]st
 	return tasks, taskIDs, nil
 }
 
-func (q *Queue) ParseExpression(expression string) (int64, error) {
+func (q *Queue) ParseExpression(ctx context.Context, expression string) (int64, error) {
 	tokens := tokenize(expression)
 	output, err := convertToRPN(tokens)
 	if err != nil {
@@ -507,21 +510,27 @@ func (q *Queue) ParseExpression(expression string) (int64, error) {
 		nextExprID = 1
 	}
 
-	// Добавляем выражение в базу данных
-	expr := shared.Expression{
-		ID:     nextExprID,
-		Status: false,
-		Result: fmt.Sprintf("id%d", tasks[len(tasks)-1].ID),
-	}
+	// userID := ctx.Value(middleware.UserID).(int64)
+
+	// // Добавляем выражение в базу данных
+	// expr := shared.Expression{
+	// 	ID:     nextExprID,
+	// 	UserID: userID,
+	// 	Status: false,
+	// 	Result: fmt.Sprintf("id%d", tasks[len(tasks)-1].ID),
+	// }
 
 	_, err = q.db.Exec(
-		"INSERT INTO expressions (id, status, result) VALUES (?, ?, ?)",
-		expr.ID, expr.Status, expr.Result,
+		"INSERT INTO expressions (id, user_id, status, result) VALUES (?, ?, ?, ?)",
+		nextExprID,                           // ID нашего выражения
+		ctx.Value(middleware.UserID).(int64), // кому принадлежит выражение
+		false,                                // статус - ещё не выполнено
+		fmt.Sprintf("id%d", tasks[len(tasks)-1].ID), // Результат - ID последней таски
 	)
 	if err != nil {
-		log.Printf("Ошибка при добавлении выражения %d: %v", expr.ID, err)
+		log.Printf("Ошибка при добавлении выражения %d: %v", nextExprID, err)
 		return 0, err
 	}
 
-	return expr.ID, nil
+	return nextExprID, nil
 }

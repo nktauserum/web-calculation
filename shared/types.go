@@ -24,6 +24,7 @@ type ExpressionRequest struct {
 // Универсальный тип выражения
 type Expression struct {
 	ID     int64  `json:"id"`
+	UserID int64  `json:"user_id"`
 	Status bool   `json:"status"`
 	Result string `json:"result"`
 }

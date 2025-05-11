@@ -2,77 +2,20 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 
+	"github.com/nktauserum/web-calculation/orchestrator/internal/controller/middleware"
 	"github.com/nktauserum/web-calculation/orchestrator/pkg/service"
-	tsk "github.com/nktauserum/web-calculation/orchestrator/pkg/task"
 	"github.com/nktauserum/web-calculation/shared"
 )
-
-func GetAvailableTask(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	queue := service.GetQueue()
-
-	if r.Method == "POST" {
-		var result shared.TaskResult
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			HandleError(w, r, err, http.StatusInternalServerError)
-			return
-		}
-		defer r.Body.Close()
-
-		err = json.Unmarshal(body, &result)
-		if err != nil {
-			HandleError(w, r, err, http.StatusInternalServerError)
-			return
-		}
-
-		queue.Done(result.ID, result.Result)
-		w.WriteHeader(http.StatusOK)
-		fmt.Printf("Задача %d успешно выполнена!\n", result.ID)
-		return
-	}
-
-	tasks := queue.GetTasks()
-	if len(tasks) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	var finalTask *shared.Task
-	var found bool
-
-	for _, task := range tasks {
-		if !task.Status && tsk.Complete(task) {
-			finalTask = queue.FindTask(task.ID)
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	resp, err := json.Marshal(finalTask)
-	if err != nil {
-		HandleError(w, r, err, http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(resp)
-}
 
 func ExpressionsListHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	queue := service.GetQueue()
+	userID := r.Context().Value(middleware.UserID).(int64)
 
 	expressions := queue.GetExpressions()
 	if len(expressions) == 0 {
@@ -82,7 +25,13 @@ func ExpressionsListHandler(w http.ResponseWriter, r *http.Request) {
 
 	var result []shared.Expression
 	for _, expression := range expressions {
-		result = append(result, expression)
+		if expression.UserID == userID {
+			result = append(result, expression)
+		}
+	}
+	if len(result) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 
 	resp, err := json.Marshal(result)
@@ -135,7 +84,13 @@ func ExpressionByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Context().Value(middleware.UserID).(int64)
 	currentTask := expressions[expressionID]
+
+	if currentTask.UserID != userID {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	resp, err := json.Marshal(&currentTask)
 	if err != nil {

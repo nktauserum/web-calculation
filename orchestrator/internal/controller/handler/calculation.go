@@ -29,7 +29,7 @@ func CalculationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queue := service.GetQueue()
-	exprID, err := queue.ParseExpression(query.Expression)
+	exprID, err := queue.ParseExpression(r.Context(), query.Expression)
 	if err != nil {
 		HandleError(w, r, err, http.StatusInternalServerError)
 		return
