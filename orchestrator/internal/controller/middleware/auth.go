@@ -8,6 +8,10 @@ import (
 	"github.com/nktauserum/web-calculation/orchestrator/pkg/auth"
 )
 
+type ID string
+
+var UserID ID = "user id"
+
 type AuthMiddleware struct {
 	authService *auth.AuthService
 }
@@ -38,7 +42,7 @@ func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Добавляем ID пользователя в контекст запроса
-		ctx := context.WithValue(r.Context(), "user_id", userID)
+		ctx := context.WithValue(r.Context(), UserID, userID)
 		next(w, r.WithContext(ctx))
 	}
 }
