@@ -114,7 +114,7 @@ def calculation_test():
         elif c_local.final()[0] == 0:
             fail("Тест 2 не пройден: сложные выражения не вычислены")
         else:
-            print(f"Тест 2 пройден частично: ({c_local.final()[0]}/{c_local.final()[1]})")
+            part(f"Тест 2 пройден частично: ({c_local.final()[0]}/{c_local.final()[1]})")
             
 
     except Exception as e:

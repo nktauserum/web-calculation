@@ -11,9 +11,11 @@ class Calculator:
         self.endpoint = endpoint
 
     def _request(self, path: str, body: dict, token=None):
+        # Выполняет HTTP запрос к API оркестратора с заданными параметрами
         response = None
 
         if token is not None:
+            # авторизируемся
             response = requests.post(
                 url=self.endpoint+path,
                 data=json.dumps(body),
@@ -36,8 +38,10 @@ class Calculator:
         elif response.status_code == 500:
             raise errors.InternalServerErrorException(response_body=response.text) 
         
-        return response            
+        return response 
+               
     def register(self, username: str, email: str, password: str) -> str:
+        # Регистрирует нового пользователя и возвращает токен
         response = self._request(path="/auth/register", body={
             "username": username,
             "email": email,
@@ -48,6 +52,7 @@ class Calculator:
         return json_response["token"]
     
     def login(self, username: str, password: str) -> str:
+        # Выполняет вход пользователя и возвращает токен
         response = self._request(path="/auth/login", body={
             "username": username,
             "password": password
@@ -57,6 +62,7 @@ class Calculator:
         return json_response["token"]
 
     def calculate(self, expression: str, token: str) -> float:
+        # Отправляет выражение на вычисление и ожидает результат
         response = self._request(path="/calculate", body={
             "expression": expression
         }, token=token)
@@ -70,6 +76,7 @@ class Calculator:
         return self._expression(expr_id, token)
 
     def _expression(self, id: int, token:str) -> float | None:
+        # Получает результат вычисления выражения по его идентификатору
         response = self._request(path="/expressions/"+str(id), body=None, token=token)
         json_response = response.json()
 
