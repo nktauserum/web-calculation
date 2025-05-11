@@ -2,3 +2,4 @@ bin
 sqlite.db
 sqlite.db-shm
 sqlite.db-wal
+__pycache__
