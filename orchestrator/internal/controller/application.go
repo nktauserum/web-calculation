@@ -85,6 +85,7 @@ func (app *Orchestrator) Run() error {
 
 	authMiddleware := middleware.NewAuthMiddleware(authService)
 
+	// запускаем gRPC сервер
 	go func() {
 		if err := app.grpc.Start(); err != nil {
 			log.Fatalf("Failed to start gRPC server: %v", err)
@@ -101,7 +102,6 @@ func (app *Orchestrator) Run() error {
 	router.HandleFunc("/api/v1/calculate", authMiddleware.RequireAuth(handler.CalculationHandler))
 	router.HandleFunc("/api/v1/expressions", authMiddleware.RequireAuth(handler.ExpressionsListHandler))
 	router.HandleFunc("/api/v1/expressions/{expressionID}", authMiddleware.RequireAuth(handler.ExpressionByIDHandler))
-	router.HandleFunc("/api/v1/tasks", authMiddleware.RequireAuth(handler.TaskListHandler))
 
 	return http.ListenAndServe(":"+fmt.Sprint(app.Port), router)
 }

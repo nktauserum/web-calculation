@@ -43,30 +43,6 @@ func ExpressionsListHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func TaskListHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	queue := service.GetQueue()
-
-	tasks := queue.GetTasks()
-	if len(tasks) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	var result []shared.Task
-	for _, task := range tasks {
-		result = append(result, task)
-	}
-
-	resp, err := json.Marshal(result)
-	if err != nil {
-		HandleError(w, r, err, http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(resp)
-}
-
 func ExpressionByIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	queue := service.GetQueue()
